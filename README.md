@@ -1,13 +1,13 @@
-Kode untuk buku "Mengenal WebGL: Pemrograman 3 Dimensi dengan Web Browser"
+Kode untuk buku **Mengenal WebGL: Pemrograman 3 Dimensi dengan Web Browser**
 
 Keterangan Masing-Masing Directory
-==================================
-WebGL-01 : Membuat Context OpenGL
-WebGL-02 : Menggambar Kotak dan Segitiga
+----------------------------------
+* WebGL-01 : Membuat Context OpenGL
+* WebGL-02 : Menggambar Kotak dan Segitiga
 
 
 Disclaimer
-==========
+----------
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
