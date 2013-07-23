@@ -12,6 +12,35 @@ squareColorBuffer   = null
 mvMatrix = mat4.create()
 pMatrix  = mat4.create()
 
+# Rotation Variables
+rotTri = 0.0
+rotSquare = 0.0
+
+
+# Matrix Stack Management
+mvMatrixStack = []
+
+mvMatrixPush = ->
+  copy = mat4.create()
+  mat4.set mvMatrix, copy
+  mvMatrixStack.push copy
+
+mvMatrixPop = ->
+  throw "Invalid popMatrix" if mvMatrixStack.length == 0
+  mvMatrix = mvMatrixStack.pop()
+
+# Animate Function
+animate = () ->
+  timeNow = new Date().getTime()
+  if animate.lastTime? and animate.lastTime != 0
+    elapsed = timeNow - animate.lastTime
+    rotTri += (90.0 * elapsed) * 0.001
+    rotSquare += (75.0 * elapsed) * 0.001
+    
+    rotTri -= 360.0 if rotTri > 360.0
+    rotSquare -= 360 if rotTri > 360.0
+  animate.lastTime = timeNow
+
 # Shader Program
 shaderProgram = null
   
@@ -158,6 +187,9 @@ initBuffers = (gl) ->
   squareColorBuffer.itemSize = 4
   squareColorBuffer.numItems = 4
 
+degToRad = (deg) ->
+  deg * Math.PI / 180.0
+
 # Menggambar layar
 drawScene = (gl) ->
   # Bersihkan Scene, Set Viewport, dan Matrix Perspektif
@@ -169,6 +201,10 @@ drawScene = (gl) ->
   # Geser -1.5 unit ke kiri dan 7 unit ke dalam
   mat4.translate mvMatrix, [-1.5, 0.0, -7.0]
   
+  # Simpan Matrix lama dan rotasi
+  mvMatrixPush()
+  mat4.rotate mvMatrix, degToRad(rotTri), [0, 1, 0]
+
   # Gambar segitiga
   gl.bindBuffer gl.ARRAY_BUFFER, triangleVBO
   gl.vertexAttribPointer shaderProgram.positionAttr, triangleVBO.itemSize,
@@ -180,10 +216,17 @@ drawScene = (gl) ->
     gl.FLOAT, false, 0, 0
 
   gl.drawArrays gl.TRIANGLES, 0, triangleVBO.numItems
+
+  # Pakai Matrix lama
+  mvMatrixPop()
   
   # Geser 3 unit ke kanan dari posisi semula
   mat4.translate mvMatrix, [3.0, 0.0, 0.0]
   
+  # Simpan Matrix lama dan rotasi
+  mvMatrixPush()
+  mat4.rotate mvMatrix, degToRad(rotSquare), [1, 0, 0]
+
   # Gambar kotak
   gl.bindBuffer gl.ARRAY_BUFFER, squareVBO
   gl.vertexAttribPointer shaderProgram.positionAttr, squareVBO.itemSize,
@@ -195,6 +238,17 @@ drawScene = (gl) ->
     gl.FLOAT, false, 0, 0
 
   gl.drawArrays gl.TRIANGLE_STRIP, 0, squareVBO.numItems
+  
+  # Pakai lagi Matrix lama
+  mvMatrixPop()
+
+# Update Function
+
+update = (gl) ->
+  window.requestAnimationFrame(update.bind(null, gl))
+  drawScene gl
+  animate()
+
 
 # Buat WebGL Context dari Canvas
 initContext = (canvasId) ->
@@ -226,4 +280,4 @@ r.startWebGL = () ->
   initBuffers gl
   gl.clearColor 0.0, 0.0, 0.0, 1.0
 
-  drawScene gl
+  update gl
