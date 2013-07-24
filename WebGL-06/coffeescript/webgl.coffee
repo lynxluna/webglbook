@@ -2,8 +2,10 @@
 # Tidak ada variabel global dan mutable untuk menghindari kesalahan
 # Pemrograman
 
+# r = Window
 r = exports ? this
 
+# Entry Point
 r.startWebGL = () ->
   gl = null
   canvas = document.getElementById "webgl-canvas"
@@ -25,11 +27,16 @@ r.startWebGL = () ->
   loadFile "js/models/cone.json",
     handleLoadFile.bind(null, gl)
 
+# Fungsi untuk menangani pemuatan model
+# gl: WebGL Context
+# model: model data dengan vertex dan index
 handleLoadFile = (gl, model) ->
+  # Buat Vertex dan Index Buffers
   vertbuf = createBuffer gl, gl.ARRAY_BUFFER, model.vertices, 3
   indexbuf = createBuffer gl, gl.ELEMENT_ARRAY_BUFFER, model.indices,
     1, Uint16Array
-
+  
+  # Vertex Shader
   vert = """
   attribute vec3 position;
   
@@ -40,7 +47,8 @@ handleLoadFile = (gl, model) ->
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }  
   """
-
+  
+  # Fragment Shader
   frag = """
   precision mediump float;
   
@@ -48,20 +56,25 @@ handleLoadFile = (gl, model) ->
     gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
   }
   """
-
+  
+  # Daftar Attribute dan Uniform
   attributes = ['position']
   uniforms   = ['modelViewMatrix','projectionMatrix']
-
+  
+  # Buat Shader Program
   shaderProgram = createShaderProgram gl, vert, frag, attributes, uniforms
   
+  # Aktifkan program
   gl.useProgram shaderProgram.program
-
+  
+  # Fungsi animate () untuk mengupdate scene
   animate = () ->
     timeNow = new Date().getTime()
     if animate.lastTime? and animate.lastTime != 0
       elapsed = timeNow - animate.lastTime
     animate.lastTime = timeNow
-
+  
+  # Render mesh
   render  = (program, vertbuf, indexbuf, gl) ->
     gl.clear gl.COLOR_BUFFER_BIT
     gl.viewport 0, 0, gl.viewportWidth, gl.viewportHeight
@@ -89,28 +102,33 @@ handleLoadFile = (gl, model) ->
     gl.drawElements gl.LINE_STRIP, indexbuf.numItems, gl.UNSIGNED_SHORT, 0
 
     stack = mvMatrixPop(stack)
-
+  
+  # Update Loop
   update = (gl, renderFunc) ->
     window.requestAnimationFrame(update.bind(null,gl, renderFunc))
     renderFunc(gl)
     animate()
   
-  gl.clearColor 0.0, 0.0, 0.0, 1.0
+  # Set warna dan depth serta aktifkan depth test
+  gl.clearColor 0.0, 0.0, 0.233, 1.0
   gl.clearDepth 1.0
   gl.enable gl.DEPTH_TEST
 
   update(gl, render.bind(null, shaderProgram, vertbuf, indexbuf))
 
+# Matrix Push
 mvMatrixPush = (stack, current) ->
   copy = mat4.create()
   mat4.set current, copy
   newStack = stack.concat(copy)
   return newStack
 
+# Matrix Pop
 mvMatrixPop = (stack) ->
   throw "Invalid popMatrix" if stack.length == 0
   return stack.slice(0,-1)
 
+# Buat Shader Program
 createShaderProgram = (gl, vertexSource, fragmentSource, attributes, uniforms) ->
   createShader = (gl, shaderSource,shaderType) ->
     shader = gl.createShader shaderType
@@ -126,6 +144,7 @@ createShaderProgram = (gl, vertexSource, fragmentSource, attributes, uniforms) -
     window.alert "Shader Error!"
     return null
   
+  # Buat Map berisi program, lokasi attribute, dan lokasi uniform
   rMap = {}
   rMap.program    = program
   rMap.attributes = {}
