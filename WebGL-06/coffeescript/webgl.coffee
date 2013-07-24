@@ -54,15 +54,16 @@ handleLoadFile = (gl, model) ->
   # Fragment Shader
   frag = """
   precision mediump float;
-  
+  uniform vec3 meshColor;
+
   void main(void) {
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    gl_FragColor = vec4(meshColor, 1.0);
   }
   """
   
   # Daftar Attribute dan Uniform
   attributes = ['position']
-  uniforms   = ['modelViewMatrix','projectionMatrix']
+  uniforms   = ['modelViewMatrix','projectionMatrix', 'meshColor']
   
   # Buat Shader Program
   shaderProgram = createShaderProgram gl, vert, frag, attributes, uniforms
@@ -102,11 +103,21 @@ handleLoadFile = (gl, model) ->
       false, pMatrix
     gl.uniformMatrix4fv program.uniforms["modelViewMatrix"],
       false, mvMatrix
-    
-    if indexbuf != null
-      gl.drawElements gl.TRIANGLES, indexbuf.numItems, gl.UNSIGNED_SHORT, 0
+    if r.meshColor == null
+      gl.uniform3fv program.uniforms["meshColor"],
+        new Float32Array([0.0, 0, 1.0])
     else
-      gl.drawArrays   gl.TRIANGLES, 0, vertbuf.numItems
+      gl.uniform3fv program.uniforms["meshColor"],
+        new Float32Array(r.meshColor)
+    
+    elem = gl.TRIANGLES
+    if window.renderMode == "1"
+      elem = gl.LINE_STRIP
+
+    if indexbuf != null
+      gl.drawElements elem, indexbuf.numItems, gl.UNSIGNED_SHORT, 0
+    else
+      gl.drawArrays   elem, 0, vertbuf.numItems
 
     stack = mvMatrixPop(stack)
   
