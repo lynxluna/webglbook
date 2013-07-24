@@ -86,7 +86,7 @@ handleLoadFile = (gl, model) ->
     stack = []
     mat4.perspective 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix
     mat4.identity mvMatrix
-    mat4.translate mvMatrix, [0.0, 0.0, -13.0]
+    mat4.translate mvMatrix, [0.0, 0.0 , -13.0]
     
     stack = mvMatrixPush(stack, mvMatrix)
     
@@ -104,9 +104,9 @@ handleLoadFile = (gl, model) ->
       false, mvMatrix
     
     if indexbuf != null
-      gl.drawElements gl.LINE_STRIP, indexbuf.numItems, gl.UNSIGNED_SHORT, 0
+      gl.drawElements gl.TRIANGLES, indexbuf.numItems, gl.UNSIGNED_SHORT, 0
     else
-      gl.drawArrays   gl.LINE_STRIP, 0, vertbuf.numItems
+      gl.drawArrays   gl.TRIANGLES, 0, vertbuf.numItems
 
     stack = mvMatrixPop(stack)
   
