@@ -7,6 +7,7 @@ r = exports ? this
 
 # Entry Point
 r.startWebGL = () ->
+  window.document.title = "WebGL 06: Memuat Model"
   gl = null
   canvas = document.getElementById "webgl-canvas"
   names  = ["webgl", "experimental-webgl", "webkit-3d", "moz-webgl"]
@@ -194,6 +195,4 @@ loadFile = (url, onComplete) ->
       else
         window.alert("ERROR! XMLHTTP:" + request.status)
   request.send()
-
-
 
