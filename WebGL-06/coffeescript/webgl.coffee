@@ -24,7 +24,7 @@ r.startWebGL = () ->
   gl.viewportWidth = canvas.width
   gl.viewportHeight = canvas.height
   url = "http://" + document.domain + name 
-  loadFile "js/models/cone.json",
+  loadFile "js/models/sunfashi.json",
     handleLoadFile.bind(null, gl)
 
 # Fungsi untuk menangani pemuatan model
@@ -33,8 +33,10 @@ r.startWebGL = () ->
 handleLoadFile = (gl, model) ->
   # Buat Vertex dan Index Buffers
   vertbuf = createBuffer gl, gl.ARRAY_BUFFER, model.vertices, 3
-  indexbuf = createBuffer gl, gl.ELEMENT_ARRAY_BUFFER, model.indices,
-    1, Uint16Array
+  indexbuf = null
+  if model.indices?
+    indexbuf = createBuffer gl, gl.ELEMENT_ARRAY_BUFFER, model.indices,
+      1, Uint16Array
   
   # Vertex Shader
   vert = """
@@ -83,7 +85,7 @@ handleLoadFile = (gl, model) ->
     stack = []
     mat4.perspective 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix
     mat4.identity mvMatrix
-    mat4.translate mvMatrix, [0.0, 0.0, -7.0]
+    mat4.translate mvMatrix, [0.0, 0.0, -13.0]
     
     stack = mvMatrixPush(stack, mvMatrix)
     
@@ -92,14 +94,18 @@ handleLoadFile = (gl, model) ->
     gl.bindBuffer gl.ARRAY_BUFFER, vertbuf
     gl.vertexAttribPointer program.attributes['position'],
       vertbuf.elemSize, gl.FLOAT, false, 0, 0
-    gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, indexbuf
+    if indexbuf != null
+      gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, indexbuf
 
     gl.uniformMatrix4fv program.uniforms["projectionMatrix"],
       false, pMatrix
     gl.uniformMatrix4fv program.uniforms["modelViewMatrix"],
       false, mvMatrix
     
-    gl.drawElements gl.LINE_STRIP, indexbuf.numItems, gl.UNSIGNED_SHORT, 0
+    if indexbuf != null
+      gl.drawElements gl.LINE_STRIP, indexbuf.numItems, gl.UNSIGNED_SHORT, 0
+    else
+      gl.drawArrays   gl.LINE_STRIP, 0, vertbuf.numItems
 
     stack = mvMatrixPop(stack)
   
