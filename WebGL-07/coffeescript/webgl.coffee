@@ -100,25 +100,25 @@ handleLoadFile = (gl, model) ->
   # Aktifkan program
   gl.useProgram shaderProgram.program
   
-  # Fungsi animate () untuk mengupdate scene
-  animate = () ->
-    timeNow = new Date().getTime()
-    if animate.lastTime? and animate.lastTime != 0
-      elapsed = timeNow - animate.lastTime
-    animate.lastTime = timeNow
+  # Modified rotation
+  rotA = 0.0
   
   # Render mesh
-  render  = (program, vertbuf, indexbuf, normalbuf = null, gl) ->
+  render  = (program, vertbuf, indexbuf, normalbuf = null, gl, deltaTime) ->
     gl.clear gl.COLOR_BUFFER_BIT
     gl.viewport 0, 0, gl.viewportWidth, gl.viewportHeight
     pMatrix = mat4.create()
     mvMatrix = mat4.create()
     nMatrix = mat4.create()
 
+    rotA += deltaTime * 45.0
+
     stack = []
     mat4.perspective 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix
-    mat4.identity mvMatrix
+    mat4.identity mvMatrix 
     mat4.translate mvMatrix, [0.0, 0.0 , -13.0]
+    mat4.rotate    mvMatrix, degToRad(rotA), [0, 1, 0]
+    i
     mat4.inverse mvMatrix, nMatrix
     mat4.transpose nMatrix, nMatrix
 
@@ -166,17 +166,20 @@ handleLoadFile = (gl, model) ->
     stack = mvMatrixPop(stack)
   
   # Update Loop
-  update = (gl, renderFunc) ->
-    window.requestAnimationFrame(update.bind(null,gl, renderFunc))
-    renderFunc(gl)
-    animate()
+  update = (gl, lastTime, renderFunc) ->
+    currentTime = new Date().getTime()
+    deltaTime = (currentTime - lastTime) / 1000.0
+    window.requestAnimationFrame(update.bind(null,gl, currentTime, renderFunc))
+    renderFunc(gl, deltaTime)
   
   # Set warna dan depth serta aktifkan depth test
   gl.clearColor 0.0, 0.0, 0.233, 1.0
   gl.clearDepth 1.0
   gl.enable gl.DEPTH_TEST
 
-  update(gl, render.bind(null, shaderProgram, vertbuf, indexbuf, normalbuf))
+  renderFunc = render.bind(null, shaderProgram, vertbuf, indexbuf, normalbuf)
+
+  update(gl, new Date().getTime() ,renderFunc)
 
 # Matrix Push
 mvMatrixPush = (stack, current) ->
