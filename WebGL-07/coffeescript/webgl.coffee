@@ -5,6 +5,15 @@
 # r = Window
 r = exports ? this
 
+# Deteksi kalau requestAnimationFrame tersedia dalam browser
+
+if not window.requestAnimationFrame?
+  if window.webkitRequestAnimationFrame?
+    window.requestAnimationFrame = window.webkitRequestAnimationFrame
+  else if window.mozRequestAnimationFrame?
+    window.requestAnimationFrame = window.mozRequestAnimationFrame
+
+
 # Entry Point
 r.startWebGL = () ->
   window.document.title = "WebGL 06: Memuat Model"

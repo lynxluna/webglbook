@@ -1,5 +1,15 @@
 r = exports ? this
 
+# Deteksi kalau requestAnimationFrame tersedia dalam browser
+
+if not window.requestAnimationFrame?
+  if window.webkitRequestAnimationFrame?
+    window.requestAnimationFrame = window.webkitRequestAnimationFrame
+  else if window.mozRequestAnimationFrame?
+    window.requestAnimationFrame = window.mozRequestAnimationFrame
+
+
+
 pyraVBO = null
 pyraColorVBO = null
 cubeVBO = null
