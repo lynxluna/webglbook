@@ -1,0 +1,18 @@
+{
+"attributes" :[
+  "position", 
+  "normal"
+],
+
+"uniforms"   :[
+  "modelViewMatrix",
+  "projectionMatrix", 
+  "normalMatrix",
+  "lightDirection", 
+  "lightDiffuse", 
+  "ambientColor",
+  "materialDiffuse",
+  "lightMatrix"
+
+]
+}
