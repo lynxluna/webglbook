@@ -10,6 +10,7 @@
   "normalMatrix",
   "lightDirection", 
   "lightDiffuse", 
-  "ambientColor"
+  "ambientColor",
+  "materialDiffuse"
 ]
 }

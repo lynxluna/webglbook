@@ -81,7 +81,7 @@ handleLoadFile = (gl, model) ->
     stack = []
     mat4.perspective 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix
     mat4.identity mvMatrix 
-    mat4.translate mvMatrix, [0.0, 0.0 , -2.0]
+    mat4.translate mvMatrix, [0.0, 0.0 , -4.0]
     mat4.rotate    mvMatrix, degToRad(rotA), [0, 1, 0]
     mat4.inverse mvMatrix, nMatrix
     mat4.transpose nMatrix, nMatrix
@@ -108,8 +108,8 @@ handleLoadFile = (gl, model) ->
       false, nMatrix
 
     gl.uniform3f program.uniforms["lightDirection"], 1.0, 2.0, -1.0
-    gl.uniform4fv program.uniforms["lightDiffuse"], new Float32Array(r.meshColor.concat(1.0))
-    
+    gl.uniform4fv program.uniforms["materialDiffuse"], new Float32Array(r.meshColor.concat(1.0))
+    gl.uniform4f program.uniforms["lightDiffuse"], 1.0, 1.0, 1.0, 1.0
     elem = gl.TRIANGLES
     if window.renderMode == "1"
       elem = gl.LINE_STRIP

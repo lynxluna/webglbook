@@ -7,6 +7,7 @@ uniform mat4 normalMatrix;
 
 uniform vec3 lightDirection;
 uniform vec4 lightDiffuse;
+uniform vec4 materialDiffuse;
 
 varying vec4 finalColor;
 void main(void) {
