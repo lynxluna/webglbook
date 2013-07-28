@@ -34,7 +34,7 @@ r.startWebGL = () ->
   gl.viewportWidth = canvas.width
   gl.viewportHeight = canvas.height
   url = "http://" + document.domain + name 
-  loadFile "js/models/sunfashi.json",
+  loadFile "js/models/sunfashi.json", true,
     handleLoadFile.bind(null, gl)
 
 # Fungsi untuk menangani pemuatan model
@@ -48,57 +48,30 @@ handleLoadFile = (gl, model) ->
     indexbuf = createBuffer gl, gl.ELEMENT_ARRAY_BUFFER, model.indices,
       1, Uint16Array
   normalbuf = createBuffer gl, gl.ARRAY_BUFFER, model.normals, 3
+  loadFile "shaders/vert.vsh", false, (vert) -> loadFile "shaders/frag.vsh", false, (frag) ->
   
-  # Vertex Shader
-  vert = """
-  attribute vec3 position;
-  attribute vec3 normal;
-
-  uniform mat4 modelViewMatrix;
-  uniform mat4 projectionMatrix;
-  uniform mat4 normalMatrix;
-
-  uniform vec3 lightDirection;
-  uniform vec4 lightDiffuse;
-  uniform vec4 materialDiffuse;
-
-  uniform vec4 ambientColor;
+    # Daftar Attribute dan Uniform
+    attributes = ['position', 'normal']
+    uniforms   = [
+      'modelViewMatrix','projectionMatrix', 'normalMatrix',
+      'lightDirection', 'lightDiffuse', 'materialDiffuse', 'ambientColor'
+    ]
   
-  varying vec4 finalColor;
-  void main(void) {
-    vec4 N     = normalize(normalMatrix * vec4(normal, 1.0));
-    vec4 L     = normalize(vec4(lightDirection, 1.0));
-    float lam  = max(dot(N.xyz, lightDirection), 0.0);
-    vec4 id    = materialDiffuse * lightDiffuse * lam;
-    finalColor = id + ambientColor;
-    vec4 pos   = modelViewMatrix * vec4(position, 1.0);
+    # Buat Shader Program
+    shaderProgram = createShaderProgram gl, vert, frag, attributes, uniforms
+  
+    # Aktifkan program
+    gl.useProgram shaderProgram.program
 
-    gl_Position = projectionMatrix * pos;
-  }  
-  """
-  
-  # Fragment Shader
-  frag = """precision highp float;
+    # Set warna dan depth serta aktifkan depth test
+    gl.clearColor 0.0, 0.0, 0.233, 1.0
+    gl.clearDepth 1.0
+    gl.enable gl.DEPTH_TEST
 
-  varying vec4 finalColor;
+    renderFunc = render.bind(null, shaderProgram, vertbuf, indexbuf, normalbuf)
 
-  void main(void) {
-    gl_FragColor = finalColor;
-  }
-  """
+    update(gl, new Date().getTime() ,renderFunc)
   
-  # Daftar Attribute dan Uniform
-  attributes = ['position', 'normal']
-  uniforms   = [
-    'modelViewMatrix','projectionMatrix', 'normalMatrix',
-    'lightDirection', 'lightDiffuse', 'materialDiffuse', 'ambientColor'
-  ]
-  
-  # Buat Shader Program
-  shaderProgram = createShaderProgram gl, vert, frag, attributes, uniforms
-  
-  # Aktifkan program
-  gl.useProgram shaderProgram.program
   
   # Modified rotation
   rotA = 0.0
@@ -118,7 +91,6 @@ handleLoadFile = (gl, model) ->
     mat4.identity mvMatrix 
     mat4.translate mvMatrix, [0.0, 0.0 , -13.0]
     mat4.rotate    mvMatrix, degToRad(rotA), [0, 1, 0]
-    i
     mat4.inverse mvMatrix, nMatrix
     mat4.transpose nMatrix, nMatrix
 
@@ -172,15 +144,7 @@ handleLoadFile = (gl, model) ->
     window.requestAnimationFrame(update.bind(null,gl, currentTime, renderFunc))
     renderFunc(gl, deltaTime)
   
-  # Set warna dan depth serta aktifkan depth test
-  gl.clearColor 0.0, 0.0, 0.233, 1.0
-  gl.clearDepth 1.0
-  gl.enable gl.DEPTH_TEST
-
-  renderFunc = render.bind(null, shaderProgram, vertbuf, indexbuf, normalbuf)
-
-  update(gl, new Date().getTime() ,renderFunc)
-
+  
 # Matrix Push
 mvMatrixPush = (stack, current) ->
   copy = mat4.create()
@@ -254,13 +218,16 @@ createBuffer = (gl, bufferType, bufferData, elemSize, objType=Float32Array ) ->
 
   return buffer
 
-loadFile = (url, onComplete) ->
+loadFile = (url, json=true, onComplete) ->
   request = new XMLHttpRequest()
   request.open "GET", url
   request.onreadystatechange = () ->
     if request.readyState == 4
       if (request.status == 200 or (request.status == 0 && document.domain.length == 0))
-        onComplete(JSON.parse(request.responseText))
+        if json
+          onComplete(JSON.parse(request.responseText))
+        else
+          onComplete(request.responseText)
       else
         window.alert("ERROR! XMLHTTP:" + request.status)
   request.send()
