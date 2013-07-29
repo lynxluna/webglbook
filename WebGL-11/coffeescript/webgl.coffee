@@ -46,7 +46,7 @@ loadTexture = (gl, texurl, shaderProgram, onComplete) ->
     gl.bindTexture gl.TEXTURE_2D, tex
     gl.uniform1i shaderProgram.uniforms["sampler"], 0
     gl.bindTexture gl.TEXTURE_2D, null
-    onComplete()
+    onComplete(tex)
     
 
 
@@ -73,7 +73,7 @@ handleLoadFile = (gl, model) ->
     shaderProgram = createShaderProgram gl, vert, frag,
       au.attributes, au.uniforms
       
-    loadTexture gl, "textures/crate0_diffuse.png", shaderProgram, -> 
+    loadTexture gl, "textures/crate0_diffuse.png", shaderProgram, (tex) -> 
       # Aktifkan program
       gl.useProgram shaderProgram.program
 
@@ -83,7 +83,7 @@ handleLoadFile = (gl, model) ->
       gl.enable gl.DEPTH_TEST
 
       renderFunc = render.bind(null, shaderProgram, vertbuf, 
-        indexbuf, normalbuf, texcoordbuf)
+        indexbuf, normalbuf, texcoordbuf, tex)
 
       update(gl, new Date().getTime() ,renderFunc)
   
@@ -92,9 +92,10 @@ handleLoadFile = (gl, model) ->
   rotA = 0.0
 
   # Render mesh
-  render  = (program, vertbuf, indexbuf, normalbuf = null, texcoordbuf, gl, deltaTime) ->
+  render  = (program, vertbuf, indexbuf, normalbuf = null, texcoordbuf, tex, gl, deltaTime) ->
     gl.clear gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT
     gl.viewport 0, 0, gl.viewportWidth, gl.viewportHeight
+    gl.bindTexture gl.TEXTURE_2D, tex
     pMatrix = mat4.create()
     mvMatrix = mat4.create()
     nMatrix = mat4.create()
