@@ -1,0 +1,24 @@
+{
+"attributes" :[
+  "position", 
+  "texcoord",
+  "normal"
+],
+
+"uniforms"   :[
+  "modelViewMatrix",
+  "projectionMatrix", 
+  "normalMatrix",
+  
+  "lightDirection", 
+  "lightDiffuse", 
+  "lightAmbient",
+  "lightSpecular",
+
+  "materialAmbient",
+  "materialDiffuse",
+  "materialSpecular",
+
+  "shininess"
+]
+}
